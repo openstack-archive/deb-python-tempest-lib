@@ -16,10 +16,12 @@ override_dh_install:
 		python$$pyvers setup.py install --install-layout=deb \
 			--root $(CURDIR)/debian/python-tempest-lib; \
 	done
+	mv $(CURDIR)/debian/python-tempest-lib/usr/bin/subunit-trace $(CURDIR)/debian/python-tempest-lib/usr/bin/python2-subunit-trace
 	set -e ; for pyvers in $(PYTHON3S); do \
 		python$$pyvers setup.py install --install-layout=deb \
 			--root $(CURDIR)/debian/python3-tempest-lib; \
 	done
+	mv $(CURDIR)/debian/python3-tempest-lib/usr/bin/subunit-trace $(CURDIR)/debian/python3-tempest-lib/usr/bin/python3-subunit-trace
 	rm -rf $(CURDIR)/debian/python*-tempest-lib/usr/lib/python*/dist-packages/*.pth
 
 override_dh_auto_test:

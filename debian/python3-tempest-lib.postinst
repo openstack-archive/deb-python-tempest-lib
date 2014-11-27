@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ] ; then
+	update-alternatives --install /usr/bin/subunit-trace subunit-trace /usr/bin/python3-subunit-trace 200
+fi
+
+#DEBHELPER#
+
+exit 0
+
