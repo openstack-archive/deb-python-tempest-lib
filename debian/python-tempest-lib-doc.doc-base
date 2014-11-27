@@ -1,0 +1,9 @@
+Document: python-tempest-lib-doc
+Title: tempest-lib Documentation
+Author: N/A
+Abstract: Sphinx documentation for tempest-lib
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-tempest-lib-doc/html/index.html
+Files: /usr/share/doc/python-tempest-lib-doc/html/*

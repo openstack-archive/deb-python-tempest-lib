@@ -1,0 +1,76 @@
+Source: python-tempest-lib
+Section: python
+Priority: optional
+Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
+Uploaders: Thomas Goirand <zigo@debian.org>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               python-all (>= 2.6.6-3~),
+               python-setuptools,
+               python-sphinx,
+               python3-all,
+               python3-setuptools
+Build-Depends-Indep: python-coverage (>= 3.6),
+                     python-mock (>= 1.0),
+                     python-oslosphinx,
+                     python-subunit,
+                     python-testscenarios (>= 0.4),
+                     python-testtools (>= 0.9.34),
+                     python3-coverage (>= 3.6),
+                     python3-mock (>= 1.0),
+                     python3-subunit,
+                     python3-testscenarios (>= 0.4),
+                     python3-testtools (>= 0.9.34),
+                     subunit,
+                     testrepository (>= 0.0.18)
+Standards-Version: 3.9.6
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/python-tempest-lib.git
+Vcs-Git: git://anonscm.debian.org/openstack/python-tempest-lib.git
+Homepage: http://www.openstack.org/
+
+Package: python-tempest-lib
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: python-babel (>= 1.3),
+         python-fixtures (>= 0.3.14),
+         python-iso8601 (>= 0.1.9),
+         python-oslo.config (>= 1.4.0.0),
+         python-pbr (>= 0.8.1),
+         python-testresources (>= 0.2.4),
+         ${misc:Depends},
+         ${python:Depends}
+Suggests: python-tempest-lib-doc
+Description: OpenStack Functional Testing Library - Python 2.x
+ This package contains the OpenStack Functional Testing Library which is used
+ by the Tempest Functional Testing suite.
+ .
+ This package contains the Python 2.x module.
+
+Package: python3-tempest-lib
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: python3-babel (>= 1.3),
+         python3-fixtures (>= 0.3.14),
+         python3-iso8601 (>= 0.1.9),
+         python3-oslo.config (>= 1.4.0.0),
+         python3-pbr (>= 0.8.1),
+         python3-testresources (>= 0.2.4),
+         ${misc:Depends},
+         ${python3:Depends}
+Suggests: python-tempest-lib-doc
+Description: OpenStack Functional Testing Library - Python 3.x
+ This package contains the OpenStack Functional Testing Library which is used
+ by the Tempest Functional Testing suite.
+ .
+ This package contains the Python 3.x module.
+
+Package: python-tempest-lib-doc
+Section: doc
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${misc:Depends}, ${sphinxdoc:Depends}
+Description: OpenStack Functional Testing Library - doc
+ This package contains the OpenStack Functional Testing Library which is used
+ by the Tempest Functional Testing suite.
+ .
+ This package contains the documentation.
