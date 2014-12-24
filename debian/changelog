@@ -1,4 +1,4 @@
-python-tempest-lib (0.0.1-1) unstable; urgency=medium
+python-tempest-lib (0.0.2-1) unstable; urgency=medium
 
   * Initial release. (Closes: #771201)
 
