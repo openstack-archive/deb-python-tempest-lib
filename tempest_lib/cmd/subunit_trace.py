@@ -19,7 +19,9 @@
 """Trace a subunit stream in reasonable detail and high accuracy."""
 
 import argparse
+import datetime
 import functools
+import os
 import re
 import sys
 
@@ -29,6 +31,13 @@ import testtools
 DAY_SECONDS = 60 * 60 * 24
 FAILS = []
 RESULTS = {}
+
+
+def total_seconds(timedelta):
+    # NOTE(mtreinish): This method is built-in to the timedelta class in
+    # python >= 2.7 it is here to enable it's use on older versions
+    return ((timedelta.days * DAY_SECONDS + timedelta.seconds) * 10 ** 6 +
+            timedelta.microseconds) / 10 ** 6
 
 
 def cleanup_test_name(name, strip_tags=True, strip_scenarios=False):
@@ -72,10 +81,15 @@ def get_duration(timestamps):
 
 
 def find_worker(test):
+    """Get the worker number.
+
+    If there are no workers because we aren't in a concurrent environment,
+    assume the worker number is 0.
+    """
     for tag in test['tags']:
         if tag.startswith('worker-'):
             return int(tag[7:])
-    return 'NaN'
+    return 0
 
 
 # Print out stdout/stderr if it exists, always
@@ -102,7 +116,7 @@ def print_attachments(stream, test, all_channels=False):
                 stream.write("    %s\n" % line)
 
 
-def show_outcome(stream, test, print_failures=False):
+def show_outcome(stream, test, print_failures=False, failonly=False):
     global RESULTS
     status = test['status']
     # TODO(sdague): ask lifeless why on this?
@@ -121,24 +135,25 @@ def show_outcome(stream, test, print_failures=False):
     if name == 'process-returncode':
         return
 
-    if status == 'success':
-        stream.write('{%s} %s [%s] ... ok\n' % (
-            worker, name, duration))
-        print_attachments(stream, test)
-    elif status == 'fail':
+    if status == 'fail':
         FAILS.append(test)
         stream.write('{%s} %s [%s] ... FAILED\n' % (
             worker, name, duration))
         if not print_failures:
             print_attachments(stream, test, all_channels=True)
-    elif status == 'skip':
-        stream.write('{%s} %s ... SKIPPED: %s\n' % (
-            worker, name, test['details']['reason'].as_text()))
-    else:
-        stream.write('{%s} %s [%s] ... %s\n' % (
-            worker, name, duration, test['status']))
-        if not print_failures:
-            print_attachments(stream, test, all_channels=True)
+    elif not failonly:
+        if status == 'success':
+            stream.write('{%s} %s [%s] ... ok\n' % (
+                worker, name, duration))
+            print_attachments(stream, test)
+        elif status == 'skip':
+            stream.write('{%s} %s ... SKIPPED: %s\n' % (
+                worker, name, test['details']['reason'].as_text()))
+        else:
+            stream.write('{%s} %s [%s] ... %s\n' % (
+                worker, name, duration, test['status']))
+            if not print_failures:
+                print_attachments(stream, test, all_channels=True)
 
     stream.flush()
 
@@ -186,13 +201,14 @@ def worker_stats(worker):
     return num_tests, delta
 
 
-def print_summary(stream):
+def print_summary(stream, elapsed_time):
     stream.write("\n======\nTotals\n======\n")
-    stream.write("Run: %s in %s sec.\n" % (count_tests('status', '.*'),
-                                           run_time()))
+    stream.write("Ran: %s tests in %.4f sec.\n" % (
+        count_tests('status', '.*'), total_seconds(elapsed_time)))
     stream.write(" - Passed: %s\n" % count_tests('status', 'success'))
     stream.write(" - Skipped: %s\n" % count_tests('status', 'skip'))
     stream.write(" - Failed: %s\n" % count_tests('status', 'fail'))
+    stream.write("Sum of execute time for each test: %.4f sec.\n" % run_time())
 
     # we could have no results, especially as we filter out the process-codes
     if RESULTS:
@@ -217,6 +233,11 @@ def parse_args():
     parser.add_argument('--fails', '-f', action='store_true',
                         dest='post_fails', help='Print failure debug '
                         'information after the stream is proccesed')
+    parser.add_argument('--failonly', action='store_true',
+                        dest='failonly', help="Don't print success items",
+                        default=(
+                            os.environ.get('TRACE_FAILONLY', False)
+                            is not False))
     return parser.parse_args()
 
 
@@ -226,20 +247,25 @@ def main():
         sys.stdin, non_subunit_name='stdout')
     outcomes = testtools.StreamToDict(
         functools.partial(show_outcome, sys.stdout,
-                          print_failures=args.print_failures))
+                          print_failures=args.print_failures,
+                          failonly=args.failonly))
     summary = testtools.StreamSummary()
     result = testtools.CopyStreamResult([outcomes, summary])
+    start_time = datetime.datetime.utcnow()
     result.startTestRun()
     try:
         stream.run(result)
     finally:
         result.stopTestRun()
+    stop_time = datetime.datetime.utcnow()
+    elapsed_time = stop_time - start_time
+
     if count_tests('status', '.*') == 0:
         print("The test run didn't actually run any tests")
         exit(1)
     if args.post_fails:
         print_fails(sys.stdout)
-    print_summary(sys.stdout)
+    print_summary(sys.stdout, elapsed_time)
     exit(0 if summary.wasSuccessful() else 1)
 
 
