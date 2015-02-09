@@ -1,6 +1,7 @@
 python-tempest-lib (0.1.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Fixed (build-)depends for this release.
 
  -- Thomas Goirand <zigo@debian.org>  Mon, 09 Feb 2015 16:18:16 +0100
 
