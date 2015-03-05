@@ -205,9 +205,12 @@ def print_summary(stream, elapsed_time):
     stream.write("\n======\nTotals\n======\n")
     stream.write("Ran: %s tests in %.4f sec.\n" % (
         count_tests('status', '.*'), total_seconds(elapsed_time)))
-    stream.write(" - Passed: %s\n" % count_tests('status', 'success'))
-    stream.write(" - Skipped: %s\n" % count_tests('status', 'skip'))
-    stream.write(" - Failed: %s\n" % count_tests('status', 'fail'))
+    stream.write(" - Passed: %s\n" % count_tests('status', '^success$'))
+    stream.write(" - Skipped: %s\n" % count_tests('status', '^skip$'))
+    stream.write(" - Expected Fail: %s\n" % count_tests('status', '^xfail$'))
+    stream.write(" - Unexpected Success: %s\n" % count_tests('status',
+                                                             '^uxsuccess$'))
+    stream.write(" - Failed: %s\n" % count_tests('status', '^fail$'))
     stream.write("Sum of execute time for each test: %.4f sec.\n" % run_time())
 
     # we could have no results, especially as we filter out the process-codes
@@ -251,6 +254,9 @@ def main():
                           failonly=args.failonly))
     summary = testtools.StreamSummary()
     result = testtools.CopyStreamResult([outcomes, summary])
+    result = testtools.StreamResultRouter(result)
+    cat = subunit.test_results.CatFiles(sys.stdout)
+    result.add_rule(cat, 'test_id', test_id=None)
     start_time = datetime.datetime.utcnow()
     result.startTestRun()
     try:

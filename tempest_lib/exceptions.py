@@ -50,18 +50,6 @@ class RestClientException(TempestException,
     pass
 
 
-class RFCViolation(RestClientException):
-    message = "RFC Violation"
-
-
-class InvalidConfiguration(TempestException):
-    message = "Invalid Configuration"
-
-
-class InvalidCredentials(TempestException):
-    message = "Invalid Credentials"
-
-
 class InvalidHttpSuccessCode(RestClientException):
     message = "The success code is different than the expected one"
 
@@ -74,52 +62,12 @@ class Unauthorized(RestClientException):
     message = 'Unauthorized'
 
 
-class InvalidServiceTag(TempestException):
-    message = "Invalid service tag"
+class Forbidden(RestClientException):
+    message = "Forbidden"
 
 
-class TimeoutException(TempestException):
+class TimeoutException(RestClientException):
     message = "Request timed out"
-
-
-class BuildErrorException(TempestException):
-    message = "Server %(server_id)s failed to build and is in ERROR status"
-
-
-class ImageKilledException(TempestException):
-    message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
-
-
-class AddImageException(TempestException):
-    message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
-
-
-class EC2RegisterImageException(TempestException):
-    message = ("Image %(image_id)s failed to become 'available' "
-               "in the allotted time")
-
-
-class VolumeBuildErrorException(TempestException):
-    message = "Volume %(volume_id)s failed to build and is in ERROR status"
-
-
-class SnapshotBuildErrorException(TempestException):
-    message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
-
-
-class VolumeBackupException(TempestException):
-    message = "Volume backup %(backup_id)s failed and is in ERROR status"
-
-
-class StackBuildErrorException(TempestException):
-    message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
-               "due to '%(stack_status_reason)s'")
-
-
-class StackResourceBuildErrorException(TempestException):
-    message = ("Resource %(resource_name)s in stack %(stack_identifier)s is "
-               "in %(resource_status)s status due to "
-               "'%(resource_status_reason)s'")
 
 
 class BadRequest(RestClientException):
@@ -128,15 +76,6 @@ class BadRequest(RestClientException):
 
 class UnprocessableEntity(RestClientException):
     message = "Unprocessable entity"
-
-
-class AuthenticationFailure(RestClientException):
-    message = ("Authentication with user %(user)s and password "
-               "%(password)s failed auth using tenant %(tenant)s.")
-
-
-class EndpointNotFound(TempestException):
-    message = "Endpoint not found"
 
 
 class RateLimitExceeded(RestClientException):
@@ -155,43 +94,16 @@ class NotImplemented(RestClientException):
     message = "Got NotImplemented error"
 
 
-class ImageFault(TempestException):
-    message = "Got image fault"
-
-
-class IdentityError(TempestException):
-    message = "Got identity error"
-
-
 class Conflict(RestClientException):
     message = "An object with that identifier already exists"
 
 
-class SSHTimeout(TempestException):
-    message = ("Connection to the %(host)s via SSH timed out.\n"
-               "User: %(user)s, Password: %(password)s")
-
-
-class SSHExecCommandFailed(TempestException):
-    """Raised when remotely executed command returns nonzero status."""
-    message = ("Command '%(command)s', exit status: %(exit_status)d, "
-               "Error:\n%(strerror)s")
-
-
-class ServerUnreachable(TempestException):
-    message = "The server is not reachable via the configured network"
-
-
-class TearDownException(TempestException):
-    message = "%(num)d cleanUp operation failed"
-
-
-class ResponseWithNonEmptyBody(RFCViolation):
+class ResponseWithNonEmptyBody(RestClientException):
     message = ("RFC Violation! Response with %(status)d HTTP Status Code "
                "MUST NOT have a body")
 
 
-class ResponseWithEntity(RFCViolation):
+class ResponseWithEntity(RestClientException):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
 
