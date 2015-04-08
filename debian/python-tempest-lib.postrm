@@ -4,6 +4,7 @@ set -e
 
 if [ "$1" = "remove" ] || [ "$1" = "disappear" ]; then
 	update-alternatives --remove subunit-trace /usr/bin/python2-subunit-trace
+	update-alternatives --remove skip-tracker /usr/bin/python2-skip-tracker
 fi
 
 #DEBHELPER#
