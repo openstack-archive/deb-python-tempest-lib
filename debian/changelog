@@ -1,4 +1,4 @@
-python-tempest-lib (0.3.0-1) UNRELEASED; urgency=medium
+python-tempest-lib (0.4.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Fixed (build-)depends for this release.
