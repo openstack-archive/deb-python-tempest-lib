@@ -1,3 +1,12 @@
+python-tempest-lib (0.5.0-1) UNRELEASED; urgency=medium
+
+  * Team upload.
+  * New upstream release:
+    - d/control: Add new BD's on paramiko and ddt.
+    - d/control: Align version requirements with upstream.
+
+ -- James Page <james.page@ubuntu.com>  Mon, 01 Jun 2015 10:51:06 +0100
+
 python-tempest-lib (0.4.0-1) unstable; urgency=medium
 
   * New upstream release.
