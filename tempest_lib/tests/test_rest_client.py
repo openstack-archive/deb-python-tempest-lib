@@ -31,8 +31,9 @@ class BaseRestClientTestClass(base.TestCase):
 
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
+        self.fake_auth_provider = fake_auth_provider.FakeAuthProvider()
         self.rest_client = rest_client.RestClient(
-            fake_auth_provider.FakeAuthProvider(), None, None)
+            self.fake_auth_provider, None, None)
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               '_log_request'))
@@ -437,6 +438,59 @@ class TestRestClientUtils(BaseRestClientTestClass):
                           self.rest_client.wait_for_resource_deletion,
                           '1234')
 
+    def test_get_versions(self):
+        self.rest_client._parse_resp = lambda x: [{'id': 'v1'}, {'id': 'v2'}]
+        actual_resp, actual_versions = self.rest_client.get_versions()
+        self.assertEqual(['v1', 'v2'], list(actual_versions))
+
+    def test__str__(self):
+        def get_token():
+            return "deadbeef"
+
+        self.fake_auth_provider.get_token = get_token
+        self.assertIsNotNone(str(self.rest_client))
+
+
+class TestProperties(BaseRestClientTestClass):
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestProperties, self).setUp()
+        creds_dict = {
+            'username': 'test-user',
+            'user_id': 'test-user_id',
+            'tenant_name': 'test-tenant_name',
+            'tenant_id': 'test-tenant_id',
+            'password': 'test-password'
+        }
+        self.rest_client = rest_client.RestClient(
+            fake_auth_provider.FakeAuthProvider(creds_dict=creds_dict),
+            None, None)
+
+    def test_properties(self):
+        self.assertEqual('test-user', self.rest_client.user)
+        self.assertEqual('test-user_id', self.rest_client.user_id)
+        self.assertEqual('test-tenant_name', self.rest_client.tenant_name)
+        self.assertEqual('test-tenant_id', self.rest_client.tenant_id)
+        self.assertEqual('test-password', self.rest_client.password)
+
+        self.rest_client.api_version = 'v1'
+        expected = {'api_version': 'v1',
+                    'endpoint_type': 'publicURL',
+                    'region': None,
+                    'service': None,
+                    'skip_path': True}
+        self.rest_client.skip_path()
+        self.assertEqual(expected, self.rest_client.filters)
+
+        self.rest_client.reset_path()
+        self.rest_client.api_version = 'v1'
+        expected = {'api_version': 'v1',
+                    'endpoint_type': 'publicURL',
+                    'region': None,
+                    'service': None}
+        self.assertEqual(expected, self.rest_client.filters)
+
 
 class TestExpectedSuccess(BaseRestClientTestClass):
 
@@ -483,3 +537,33 @@ class TestExpectedSuccess(BaseRestClientTestClass):
         read_code = 202
         self.assertRaises(AssertionError, self.rest_client.expected_success,
                           expected_code, read_code)
+
+
+class TestResponseBody(base.TestCase):
+
+    def test_str(self):
+        response = {'status': 200}
+        body = {'key1': 'value1'}
+        actual = rest_client.ResponseBody(response, body)
+        self.assertEqual("response: %s\nBody: %s" % (response, body),
+                         str(actual))
+
+
+class TestResponseBodyData(base.TestCase):
+
+    def test_str(self):
+        response = {'status': 200}
+        data = 'data1'
+        actual = rest_client.ResponseBodyData(response, data)
+        self.assertEqual("response: %s\nBody: %s" % (response, data),
+                         str(actual))
+
+
+class TestResponseBodyList(base.TestCase):
+
+    def test_str(self):
+        response = {'status': 200}
+        body = ['value1', 'value2', 'value3']
+        actual = rest_client.ResponseBodyList(response, body)
+        self.assertEqual("response: %s\nBody: %s" % (response, body),
+                         str(actual))

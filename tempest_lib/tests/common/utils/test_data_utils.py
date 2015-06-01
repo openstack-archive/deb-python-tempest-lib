@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
 
 from tempest_lib.common.utils import data_utils
 from tempest_lib.tests import base
@@ -48,6 +49,20 @@ class TestDataUtils(base.TestCase):
         self.assertTrue(actual.startswith('foo'))
         self.assertNotEqual(actual, actual2)
 
+    def test_rand_name_with_prefix(self):
+        actual = data_utils.rand_name(prefix='prefix-str')
+        self.assertIsInstance(actual, str)
+        self.assertRegexpMatches(actual, "^prefix-str-")
+        actual2 = data_utils.rand_name(prefix='prefix-str')
+        self.assertNotEqual(actual, actual2)
+
+    def test_rand_url(self):
+        actual = data_utils.rand_url()
+        self.assertIsInstance(actual, str)
+        self.assertRegexpMatches(actual, "^https://url-[0-9]*\.com$")
+        actual2 = data_utils.rand_url()
+        self.assertNotEqual(actual, actual2)
+
     def test_rand_int(self):
         actual = data_utils.rand_int_id()
         self.assertIsInstance(actual, int)
@@ -75,3 +90,50 @@ class TestDataUtils(base.TestCase):
         self.assertEqual(actual, "abc" * int(30 / len("abc")))
         actual = data_utils.arbitrary_string(size=5, base_text="deadbeaf")
         self.assertEqual(actual, "deadb")
+
+    def test_random_bytes(self):
+        actual = data_utils.random_bytes()  # default size=1024
+        self.assertIsInstance(actual, str)
+        self.assertRegexpMatches(actual, "^[\x00-\xFF]{1024}")
+        actual2 = data_utils.random_bytes()
+        self.assertNotEqual(actual, actual2)
+
+        actual = data_utils.random_bytes(size=2048)
+        self.assertRegexpMatches(actual, "^[\x00-\xFF]{2048}")
+
+    def test_get_ipv6_addr_by_EUI64(self):
+        actual = data_utils.get_ipv6_addr_by_EUI64('2001:db8::',
+                                                   '00:16:3e:33:44:55')
+        self.assertIsInstance(actual, netaddr.IPAddress)
+        self.assertEqual(actual,
+                         netaddr.IPAddress('2001:db8::216:3eff:fe33:4455'))
+
+    def test_get_ipv6_addr_by_EUI64_with_IPv4_prefix(self):
+        ipv4_prefix = '10.0.8'
+        mac = '00:16:3e:33:44:55'
+        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
+                          ipv4_prefix, mac)
+
+    def test_get_ipv6_addr_by_EUI64_bad_cidr_type(self):
+        bad_cidr = 123
+        mac = '00:16:3e:33:44:55'
+        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
+                          bad_cidr, mac)
+
+    def test_get_ipv6_addr_by_EUI64_bad_cidr_value(self):
+        bad_cidr = 'bb'
+        mac = '00:16:3e:33:44:55'
+        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
+                          bad_cidr, mac)
+
+    def test_get_ipv6_addr_by_EUI64_bad_mac_value(self):
+        cidr = '2001:db8::'
+        bad_mac = '00:16:3e:33:44:5Z'
+        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
+                          cidr, bad_mac)
+
+    def test_get_ipv6_addr_by_EUI64_bad_mac_type(self):
+        cidr = '2001:db8::'
+        bad_mac = 99999999999999999999
+        self.assertRaises(TypeError, data_utils.get_ipv6_addr_by_EUI64,
+                          cidr, bad_mac)

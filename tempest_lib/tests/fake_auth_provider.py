@@ -16,5 +16,18 @@
 
 class FakeAuthProvider(object):
 
+    def __init__(self, creds_dict={}):
+        self.credentials = FakeCredentials(creds_dict)
+
     def auth_request(self, method, url, headers=None, body=None, filters=None):
         return url, headers, body
+
+    def base_url(self, filters, auth_data=None):
+        return "https://example.com"
+
+
+class FakeCredentials(object):
+
+    def __init__(self, creds_dict):
+        for key in creds_dict.keys():
+            setattr(self, key, creds_dict[key])
