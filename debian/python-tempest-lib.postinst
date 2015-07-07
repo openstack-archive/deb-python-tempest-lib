@@ -3,7 +3,6 @@
 set -e
 
 if [ "$1" = "configure" ] ; then
-	update-alternatives --install /usr/bin/subunit-trace subunit-trace /usr/bin/python2-subunit-trace 300
 	update-alternatives --install /usr/bin/skip-tracker skip-tracker /usr/bin/python2-skip-tracker 300
 fi
 

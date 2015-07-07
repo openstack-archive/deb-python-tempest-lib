@@ -1,9 +1,13 @@
 python-tempest-lib (0.5.0-2) UNRELEASED; urgency=medium
 
+  [ James Page ]
   * Cherry pick patch from upstream VCS to switch to using os-testr,
     add os-testr to (build-)depends.
 
- -- James Page <james.page@ubuntu.com>  Tue, 23 Jun 2015 10:29:26 +0100
+  [ Thomas Goirand ]
+  * Removed installation of subunit-trace, now in python-os-testr.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 07 Jul 2015 23:37:34 +0200
 
 python-tempest-lib (0.5.0-1) experimental; urgency=medium
 
