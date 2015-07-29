@@ -2,6 +2,7 @@ python-tempest-lib (0.7.0-1) experimental; urgency=medium
 
   * New upstream release.
   * Fixed (build-)depends for this release.
+  * Removed debian/patches/os-testr-compat.patch applied upstream.
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 29 Jul 2015 23:15:40 +0000
 
