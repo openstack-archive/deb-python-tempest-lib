@@ -34,6 +34,10 @@ MAX_RECURSION_DEPTH = 2
 # All the successful HTTP status codes from RFC 7231 & 4918
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
+# JSON Schema validator and format checker used for JSON Schema validation
+JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
+FORMAT_CHECKER = jsonschema.draft4_format_checker
+
 
 class RestClient(object):
     """Unified OpenStack RestClient class
@@ -435,8 +439,18 @@ class RestClient(object):
             self._log_request_full(method, req_url, resp, secs, req_headers,
                                    req_body, resp_body, caller_name, extra)
 
+    def _json_loads(self, resp_body):
+        if isinstance(resp_body, bytes):
+            resp_body = json.loads(resp_body.decode('utf8'))
+        else:
+            resp_body = json.loads(resp_body)
+        return resp_body
+
     def _parse_resp(self, body):
-        body = json.loads(body)
+        try:
+            body = self._json_loads(body)
+        except ValueError:
+            return body
 
         # We assume, that if the first value of the deserialized body's
         # item set is a dict or a list, that we just return the first value
@@ -576,9 +590,8 @@ class RestClient(object):
         :rtype: tuple
         :return: a tuple with the first entry containing the response headers
                  and the second the response body
-        :raises InvalidContentType: If the content-type of the response isn't
-                                    an expect type or a 415 response code is
-                                    received
+        :raises UnexpectedContentType: If the content-type of the response
+                                       isn't an expect type
         :raises Unauthorized: If a 401 response code is received
         :raises Forbidden: If a 403 response code is received
         :raises NotFound: If a 404 response code is received
@@ -588,6 +601,7 @@ class RestClient(object):
                           not in the response body
         :raises RateLimitExceeded: If a 413 response code is received and
                                    over_limit is in the response body
+        :raises InvalidContentType: If a 415 response code is received
         :raises UnprocessableEntity: If a 422 response code is received
         :raises InvalidHTTPResponseBody: The response body wasn't valid JSON
                                          and couldn't be parsed
@@ -663,15 +677,21 @@ class RestClient(object):
         elif ctype.lower() in TXT_ENC:
             parse_resp = False
         else:
-            raise exceptions.InvalidContentType(str(resp.status))
+            raise exceptions.UnexpectedContentType(str(resp.status))
 
         if resp.status == 401:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.Unauthorized(resp_body)
 
         if resp.status == 403:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.Forbidden(resp_body)
 
         if resp.status == 404:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:
@@ -731,7 +751,7 @@ class RestClient(object):
             if resp.status == 501:
                 raise exceptions.NotImplemented(message)
             else:
-                raise exceptions.ServerFault(message)
+                raise exceptions.ServerFault(resp_body, message=message)
 
         if resp.status >= 400:
             raise exceptions.UnexpectedResponseCode(str(resp.status))
@@ -796,7 +816,9 @@ class RestClient(object):
             body_schema = schema.get('response_body')
             if body_schema:
                 try:
-                    jsonschema.validate(body, body_schema)
+                    jsonschema.validate(body, body_schema,
+                                        cls=JSONSCHEMA_VALIDATOR,
+                                        format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
                     msg = ("HTTP response body is invalid (%s)") % ex
                     raise exceptions.InvalidHTTPResponseBody(msg)
@@ -809,7 +831,9 @@ class RestClient(object):
             header_schema = schema.get('response_header')
             if header_schema:
                 try:
-                    jsonschema.validate(resp, header_schema)
+                    jsonschema.validate(resp, header_schema,
+                                        cls=JSONSCHEMA_VALIDATOR,
+                                        format_checker=FORMAT_CHECKER)
                 except jsonschema.ValidationError as ex:
                     msg = ("HTTP response header is invalid (%s)") % ex
                     raise exceptions.InvalidHTTPResponseHeader(msg)
