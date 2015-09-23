@@ -34,6 +34,9 @@ MAX_RECURSION_DEPTH = 2
 # All the successful HTTP status codes from RFC 7231 & 4918
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206, 207)
 
+# All the redirection HTTP status codes from RFC 7231 & 4918
+HTTP_REDIRECTION = (300, 301, 302, 303, 304, 305, 306, 307)
+
 # JSON Schema validator and format checker used for JSON Schema validation
 JSONSCHEMA_VALIDATOR = jsonschema.Draft4Validator
 FORMAT_CHECKER = jsonschema.draft4_format_checker
@@ -223,9 +226,9 @@ class RestClient(object):
                       ).format(expected_code)
         if isinstance(expected_code, list):
             for code in expected_code:
-                assert code in HTTP_SUCCESS, assert_msg
+                assert code in HTTP_SUCCESS + HTTP_REDIRECTION, assert_msg
         else:
-            assert expected_code in HTTP_SUCCESS, assert_msg
+            assert expected_code in HTTP_SUCCESS + HTTP_REDIRECTION, assert_msg
 
         # NOTE(afazekas): the http status code above 400 is processed by
         # the _error_checker method
@@ -677,50 +680,51 @@ class RestClient(object):
         elif ctype.lower() in TXT_ENC:
             parse_resp = False
         else:
-            raise exceptions.UnexpectedContentType(str(resp.status))
+            raise exceptions.UnexpectedContentType(str(resp.status),
+                                                   resp=resp)
 
         if resp.status == 401:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.Unauthorized(resp_body)
+            raise exceptions.Unauthorized(resp_body, resp=resp)
 
         if resp.status == 403:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.Forbidden(resp_body)
+            raise exceptions.Forbidden(resp_body, resp=resp)
 
         if resp.status == 404:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.NotFound(resp_body)
+            raise exceptions.NotFound(resp_body, resp=resp)
 
         if resp.status == 400:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.BadRequest(resp_body)
+            raise exceptions.BadRequest(resp_body, resp=resp)
 
         if resp.status == 409:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.Conflict(resp_body)
+            raise exceptions.Conflict(resp_body, resp=resp)
 
         if resp.status == 413:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
             if self.is_absolute_limit(resp, resp_body):
-                raise exceptions.OverLimit(resp_body)
+                raise exceptions.OverLimit(resp_body, resp=resp)
             else:
-                raise exceptions.RateLimitExceeded(resp_body)
+                raise exceptions.RateLimitExceeded(resp_body, resp=resp)
 
         if resp.status == 415:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.InvalidContentType(resp_body)
+            raise exceptions.InvalidContentType(resp_body, resp=resp)
 
         if resp.status == 422:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.UnprocessableEntity(resp_body)
+            raise exceptions.UnprocessableEntity(resp_body, resp=resp)
 
         if resp.status in (500, 501):
             message = resp_body
@@ -749,12 +753,15 @@ class RestClient(object):
                         message = resp_body
 
             if resp.status == 501:
-                raise exceptions.NotImplemented(message)
+                raise exceptions.NotImplemented(resp_body, resp=resp,
+                                                message=message)
             else:
-                raise exceptions.ServerFault(resp_body, message=message)
+                raise exceptions.ServerFault(resp_body, resp=resp,
+                                             message=message)
 
         if resp.status >= 400:
-            raise exceptions.UnexpectedResponseCode(str(resp.status))
+            raise exceptions.UnexpectedResponseCode(str(resp.status),
+                                                    resp=resp)
 
     def is_absolute_limit(self, resp, resp_body):
         if (not isinstance(resp_body, collections.Mapping) or
@@ -809,7 +816,7 @@ class RestClient(object):
         # code if it exists is something that we expect. This is explicitly
         # declared in the V3 API and so we should be able to export this in
         # the response schema. For now we'll ignore it.
-        if resp.status in HTTP_SUCCESS:
+        if resp.status in HTTP_SUCCESS + HTTP_REDIRECTION:
             cls.expected_success(schema['status_code'], resp.status)
 
             # Check the body of a response

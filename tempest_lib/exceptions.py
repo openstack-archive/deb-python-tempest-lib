@@ -48,6 +48,8 @@ class TempestException(Exception):
 class RestClientException(TempestException,
                           testtools.TestCase.failureException):
     def __init__(self, resp_body=None, *args, **kwargs):
+        if 'resp' in kwargs:
+            self.resp = kwargs.get('resp')
         self.resp_body = resp_body
         message = kwargs.get("message", resp_body)
         super(RestClientException, self).__init__(message, *args, **kwargs)
@@ -184,4 +186,5 @@ class SSHTimeout(TempestException):
 class SSHExecCommandFailed(TempestException):
     """Raised when remotely executed command returns nonzero status."""
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
-               "Error:\n%(strerror)s")
+               "stderr:\n%(stderr)s\n"
+               "stdout:\n%(stdout)s")

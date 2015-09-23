@@ -49,28 +49,23 @@ git clone $TEMPEST_GIT_URL $tmpdir
 cd $tmpdir
 
 for file in $files; do
-    # get only commits that touch our files
-    commits="$commits $(git log --format=format:%h --no-merges --follow -- $file)"
-    # then their merge commits - which works fina since we merge commits
-    # individually.
-    merge_commits="$merge_commits $(git log --format=format:%h --merges --first-parent -- $file)"
+    # Get the latest change-id for each file
+    change_id=`git log -n1 --grep "Change-Id: " -- $file | grep "Change-Id: " | awk '{print $2}'`
+    CHANGE_LIST=`echo -e "$CHANGE_LIST\n * $file: $change_id"`
 done
-
-pattern="\n$(echo $commits $merge_commits | sed -e 's/ /\\|/g')"
-
-# order them by filtering each one in the order it appears on rev-list
-SHA1_LIST=$(git rev-list --oneline HEAD | grep $pattern)
 
 # Move files and commit
 cd -
 file_list=''
 for file in $files; do
     filename=`basename $file`
+    dirname=`dirname $file`
     if [ -n "$output_dir" ]; then
-        dest_file="$output_dir/$filename"
+        dirname="$output_dir"
     else
-        dest_file="tempest_lib/$filename"
+        dirname=`echo $dirname | sed s@tempest\/@tempest_lib/\@`
     fi
+    dest_file="$dirname/$filename"
     cp -r "$tmpdir/$file" "$dest_file"
     git add "$dest_file"
     if [[ -z "$file_list" ]]; then
@@ -86,4 +81,4 @@ rm -rf $tmpdir
 commit_message="Migrated $file_list from tempest"
 pre_list=$"This migrates the above files from tempest. This includes tempest commits:"
 post_list=$"to see the commit history for these files refer to the above sha1s in the tempest repository"
-git commit -m "$commit_message" -m "$pre_list" -m "$SHA1_LIST" -m "$post_list"
+git commit -m "$commit_message" -m "$pre_list" -m "$CHANGE_LIST" -m "$post_list"
