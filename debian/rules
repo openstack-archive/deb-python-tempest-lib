@@ -24,6 +24,9 @@ override_dh_install:
 	mv $(CURDIR)/debian/python3-tempest-lib/usr/bin/skip-tracker $(CURDIR)/debian/python3-tempest-lib/usr/bin/python3-skip-tracker
 	rm -rf $(CURDIR)/debian/python*-tempest-lib/usr/lib/python*/dist-packages/*.pth
 
+override_dh_python3:
+	dh_python3 --shebang=/usr/bin/python3
+
 override_dh_auto_test:
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 	echo "===> Running tests"
