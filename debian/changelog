@@ -1,6 +1,7 @@
 python-tempest-lib (0.11.0-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * d/control: Align dependencies with upstream.
 
  -- Corey Bryant <corey.bryant@canonical.com>  Tue, 01 Dec 2015 14:18:04 -0500
 
