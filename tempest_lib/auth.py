@@ -43,7 +43,18 @@ class AuthProvider(object):
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
-            raise TypeError("Invalid credentials")
+            if isinstance(credentials, Credentials):
+                password = credentials.get('password')
+                message = "Credentials are: " + str(credentials)
+                if password is None:
+                    message += " Password is not defined."
+                else:
+                    message += " Password is defined."
+                raise exceptions.InvalidCredentials(message)
+            else:
+                raise TypeError("credentials object is of type %s, which is"
+                                " not a valid Credentials object type." %
+                                credentials.__class__.__name__)
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
@@ -137,9 +148,15 @@ class AuthProvider(object):
                     auth_data=self.alt_auth_data)
                 alt_auth_req = dict(url=alt_url, headers=alt_headers,
                                     body=alt_body)
+                if auth_req[self.alt_part] == alt_auth_req[self.alt_part]:
+                    raise exceptions.BadAltAuth(part=self.alt_part)
                 auth_req[self.alt_part] = alt_auth_req[self.alt_part]
 
             else:
+                # If the requested part is not affected by auth, we are
+                # not altering auth as expected, raise an exception
+                if auth_req[self.alt_part] == orig_req[self.alt_part]:
+                    raise exceptions.BadAltAuth(part=self.alt_part)
                 # If alt auth data is None, skip auth in the requested part
                 auth_req[self.alt_part] = orig_req[self.alt_part]
 
@@ -517,11 +534,13 @@ class Credentials(object):
             if key in self.ATTRIBUTES:
                 setattr(self, key, attr[key])
             else:
-                raise exceptions.InvalidCredentials
+                msg = '%s is not a valid attr for %s' % (key, self.__class__)
+                raise exceptions.InvalidCredentials(msg)
 
     def __str__(self):
         """Represent only attributes included in self.ATTRIBUTES"""
-        _repr = dict((k, getattr(self, k)) for k in self.ATTRIBUTES)
+        attrs = [attr for attr in self.ATTRIBUTES if attr is not 'password']
+        _repr = dict((k, getattr(self, k)) for k in attrs)
         return str(_repr)
 
     def __eq__(self, other):
@@ -543,7 +562,7 @@ class Credentials(object):
         else:
             raise AttributeError
 
-    def get(self, item, default):
+    def get(self, item, default=None):
         # In this patch act as dict for backward compatibility
         try:
             return getattr(self, item)
