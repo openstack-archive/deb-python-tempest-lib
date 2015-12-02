@@ -5,6 +5,7 @@ set -e
 if [ "$1" = "remove" ] || [ "$1" = "disappear" ]; then
 	update-alternatives --remove subunit-trace /usr/bin/python3-subunit-trace
 	update-alternatives --remove skip-tracker /usr/bin/python3-skip-tracker
+	update-alternatives --remove check-uuid /usr/bin/python3-check-uuid
 fi
 
 #DEBHELPER#

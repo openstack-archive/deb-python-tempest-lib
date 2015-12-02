@@ -3,6 +3,7 @@ python-tempest-lib (0.11.0-1) experimental; urgency=medium
   [ Thomas Goirand ]
   * New upstream release.
   * Fixed (build-)depends for this release.
+  * Added check-uuid to the update-alternative handling.
 
   [ Corey Bryant ]
   * d/control: Update uploaders.

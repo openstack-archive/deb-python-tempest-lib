@@ -21,7 +21,9 @@ override_dh_install:
 			--root $(CURDIR)/debian/python3-tempest-lib; \
 	done
 	mv $(CURDIR)/debian/python-tempest-lib/usr/bin/skip-tracker $(CURDIR)/debian/python-tempest-lib/usr/bin/python2-skip-tracker
+	mv $(CURDIR)/debian/python-tempest-lib/usr/bin/check-uuid $(CURDIR)/debian/python-tempest-lib/usr/bin/python2-check-uuid
 	mv $(CURDIR)/debian/python3-tempest-lib/usr/bin/skip-tracker $(CURDIR)/debian/python3-tempest-lib/usr/bin/python3-skip-tracker
+	mv $(CURDIR)/debian/python3-tempest-lib/usr/bin/check-uuid $(CURDIR)/debian/python3-tempest-lib/usr/bin/python3-check-uuid
 	rm -rf $(CURDIR)/debian/python*-tempest-lib/usr/lib/python*/dist-packages/*.pth
 
 override_dh_python3:

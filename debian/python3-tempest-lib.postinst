@@ -4,6 +4,7 @@ set -e
 
 if [ "$1" = "configure" ] ; then
 	update-alternatives --install /usr/bin/skip-tracker skip-tracker /usr/bin/python3-skip-tracker 200
+	update-alternatives --install /usr/bin/check-uuid check-uuid /usr/bin/python3-check-uuid 200
 fi
 
 #DEBHELPER#
