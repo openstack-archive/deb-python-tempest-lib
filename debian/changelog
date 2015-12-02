@@ -1,3 +1,10 @@
+python-tempest-lib (0.11.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 02 Dec 2015 15:22:51 +0100
+
 python-tempest-lib (0.9.0-3) unstable; urgency=medium
 
   * override_dh_python3 to fix Py3 shebang.
