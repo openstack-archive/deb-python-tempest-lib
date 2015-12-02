@@ -23,12 +23,14 @@ function usage {
 set -e
 
 output_dir=""
+service_client=0
 
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help) usage; exit;;
         -o|--output_dir) output_dir="$2"; shift;;
         -u|--tempest_git_url) tempest_git_url="$2"; shift;;
+        -s|--service_client) service_client=1;;
         *) files="$files $1";;
     esac
     shift
@@ -51,7 +53,8 @@ cd $tmpdir
 for file in $files; do
     # Get the latest change-id for each file
     change_id=`git log -n1 --grep "Change-Id: " -- $file | grep "Change-Id: " | awk '{print $2}'`
-    CHANGE_LIST=`echo -e "$CHANGE_LIST\n * $file: $change_id"`
+    filename=`basename $file`
+    CHANGE_LIST=`echo -e "$CHANGE_LIST\n * $filename: $change_id"`
 done
 
 # Move files and commit
@@ -64,9 +67,28 @@ for file in $files; do
         dirname="$output_dir"
     else
         dirname=`echo $dirname | sed s@tempest\/@tempest_lib/\@`
+        if [ $service_client -eq 1 ]; then
+            # Remove /json path because tempest-lib supports JSON only without XML
+            dirname=`echo $dirname | sed s@\/json@@`
+        fi
     fi
     dest_file="$dirname/$filename"
     cp -r "$tmpdir/$file" "$dest_file"
+
+    if [ $service_client -eq 1 ]; then
+        # service_client module is not necessary in tempest-lib because rest_client can be used instead
+        sed -i='' s/"from tempest.common import service_client"/"from tempest_lib.common import rest_client"/ $dest_file
+        sed -i='' s/"service_client.ServiceClient"/"rest_client.RestClient"/  $dest_file
+        sed -i='' s/"service_client.ResponseBody"/"rest_client.ResponseBody"/ $dest_file
+        sed -i='' s/"from tempest\."/"from tempest_lib\."/ $dest_file
+
+        # Replace mocked path in unit tests
+        sed -i='' s/"tempest.common.rest_client"/"tempest_lib.common.rest_client"/ $dest_file
+
+        # Remove ".json" from import line
+        sed -i='' -e "s/^\(from tempest_lib\.services\..*\)\.json\(.*\)/\1\2/" $dest_file
+    fi
+
     git add "$dest_file"
     if [[ -z "$file_list" ]]; then
         file_list="$filename"
@@ -79,6 +101,13 @@ rm -rf $tmpdir
 
 # Generate a migration commit
 commit_message="Migrated $file_list from tempest"
-pre_list=$"This migrates the above files from tempest. This includes tempest commits:"
-post_list=$"to see the commit history for these files refer to the above sha1s in the tempest repository"
-git commit -m "$commit_message" -m "$pre_list" -m "$CHANGE_LIST" -m "$post_list"
+pre_list=$"This migrates the above files from tempest.\nThis includes tempest commits:"
+pre_list=`echo -e $pre_list`
+post_list=$"to see the commit history for these files refer to the above Change-Ids \nin the tempest repository."
+post_list=`echo -e $post_list`
+if [ $service_client -eq 1 ]; then
+    bp_msg="Partially implements blueprint migrate-service-clients-to-tempest-lib"
+else
+    bp_msg=""
+fi
+git commit -m "$commit_message" -m "$pre_list" -m "$CHANGE_LIST" -m "$post_list" -m "$bp_msg"
