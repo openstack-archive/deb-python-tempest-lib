@@ -1,6 +1,7 @@
 python-tempest-lib (0.13.0-1) experimental; urgency=medium
 
   * New upstream release.
+  * Fixed (build-)depends for this release.
 
  -- Thomas Goirand <zigo@debian.org>  Thu, 14 Jan 2016 07:17:39 +0000
 
