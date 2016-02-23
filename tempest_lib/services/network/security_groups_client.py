@@ -13,35 +13,26 @@
 from tempest_lib.services.network import base
 
 
-class SubnetsClient(base.BaseNetworkClient):
+class SecurityGroupsClient(base.BaseNetworkClient):
 
-    def create_subnet(self, **kwargs):
-        uri = '/subnets'
-        post_data = {'subnet': kwargs}
+    def create_security_group(self, **kwargs):
+        uri = '/security-groups'
+        post_data = {'security_group': kwargs}
         return self.create_resource(uri, post_data)
 
-    def update_subnet(self, subnet_id, **kwargs):
-        uri = '/subnets/%s' % subnet_id
-        post_data = {'subnet': kwargs}
+    def update_security_group(self, security_group_id, **kwargs):
+        uri = '/security-groups/%s' % security_group_id
+        post_data = {'security_group': kwargs}
         return self.update_resource(uri, post_data)
 
-    def show_subnet(self, subnet_id, **fields):
-        uri = '/subnets/%s' % subnet_id
+    def show_security_group(self, security_group_id, **fields):
+        uri = '/security-groups/%s' % security_group_id
         return self.show_resource(uri, **fields)
 
-    def delete_subnet(self, subnet_id):
-        uri = '/subnets/%s' % subnet_id
+    def delete_security_group(self, security_group_id):
+        uri = '/security-groups/%s' % security_group_id
         return self.delete_resource(uri)
 
-    def list_subnets(self, **filters):
-        uri = '/subnets'
+    def list_security_groups(self, **filters):
+        uri = '/security-groups'
         return self.list_resources(uri, **filters)
-
-    def create_bulk_subnets(self, **kwargs):
-        """Create multiple subnets in a single request.
-
-        Available params: see http://developer.openstack.org/
-                              api-ref-networking-v2.html#bulkCreateSubnet
-        """
-        uri = '/subnets'
-        return self.create_resource(uri, kwargs)

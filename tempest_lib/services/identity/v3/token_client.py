@@ -28,6 +28,9 @@ class V3TokenClient(rest_client.RestClient):
             None, None, None, disable_ssl_certificate_validation=dscv,
             ca_certs=ca_certs, trace_requests=trace_requests)
 
+        if auth_url is None:
+            raise exceptions.IdentityError("Couldn't determine auth_url")
+
         if 'auth/tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/auth/tokens'
 
@@ -113,7 +116,7 @@ class V3TokenClient(rest_client.RestClient):
         elif domain_name:
             creds['auth']['scope'] = dict(domain={'name': domain_name})
 
-        body = json.dumps(creds)
+        body = json.dumps(creds, sort_keys=True)
         resp, body = self.post(self.auth_url, body=body)
         self.expected_success(201, resp.status)
         return rest_client.ResponseBody(resp, body)
