@@ -1,4 +1,4 @@
-python-tempest-lib (0.14.0-1) UNRELEASED; urgency=medium
+python-tempest-lib (0.14.0-2) UNRELEASED; urgency=medium
 
   [ Corey Bryant ]
   * New upstream release.
@@ -6,7 +6,10 @@ python-tempest-lib (0.14.0-1) UNRELEASED; urgency=medium
   [ Ondřej Nový ]
   * Fixed VCS URLs (https).
 
- -- Corey Bryant <corey.bryant@canonical.com>  Tue, 23 Feb 2016 10:38:52 -0500
+  [ Thomas Goirand ]
+  * Standards-Version: 3.9.7 (no change).
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 02 Mar 2016 12:19:04 +0000
 
 python-tempest-lib (0.13.0-1) experimental; urgency=medium
 
