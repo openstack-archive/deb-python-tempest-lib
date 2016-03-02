@@ -1,4 +1,4 @@
-python-tempest-lib (0.14.0-2) UNRELEASED; urgency=medium
+python-tempest-lib (0.14.0-1) experimental; urgency=medium
 
   [ Corey Bryant ]
   * New upstream release.
