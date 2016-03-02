@@ -8,6 +8,7 @@ python-tempest-lib (0.14.0-2) UNRELEASED; urgency=medium
 
   [ Thomas Goirand ]
   * Standards-Version: 3.9.7 (no change).
+  * Fixed debian/copyright ordering.
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 02 Mar 2016 12:19:04 +0000
 
