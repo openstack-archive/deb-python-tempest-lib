@@ -1,3 +1,9 @@
+python-tempest-lib (0.14.0-2) unstable; urgency=medium
+
+  * Uploading to unstable.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 04 Apr 2016 08:58:58 +0000
+
 python-tempest-lib (0.14.0-1) experimental; urgency=medium
 
   [ Corey Bryant ]
