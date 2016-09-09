@@ -1,4 +1,5 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=openstack/tempest-lib.git
+project=openstack/deb-python-tempest-lib.git
+defaultbranch=debian/newton
