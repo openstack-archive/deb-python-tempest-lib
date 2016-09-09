@@ -1,0 +1,8 @@
+Code-Review+2: Thomas Goirand <thomas@goirand.fr>
+Workflow+1: Thomas Goirand <thomas@goirand.fr>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Fri, 09 Sep 2016 23:12:16 +0000
+Reviewed-on: https://review.openstack.org/368098
+Project: openstack/deb-python-tempest-lib
+Branch: refs/heads/debian/newton
