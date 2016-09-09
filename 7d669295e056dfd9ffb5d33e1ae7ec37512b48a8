@@ -1,0 +1,9 @@
+Code-Review+2: Ghanshyam Mann <ghanshyam.mann@nectechnologies.in>
+Code-Review+2: Matthew Treinish <mtreinish@kortar.org>
+Workflow+1: Matthew Treinish <mtreinish@kortar.org>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Wed, 24 Feb 2016 20:35:46 +0000
+Reviewed-on: https://review.openstack.org/283673
+Project: openstack/deb-python-tempest-lib
+Branch: refs/heads/master

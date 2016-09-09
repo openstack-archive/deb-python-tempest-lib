@@ -1,0 +1,10 @@
+Code-Review+2: Andrea Frittoli <andrea.frittoli@hpe.com>
+Code-Review+1: Stephen Lowrie <stephen.lowrie@rackspace.com>
+Code-Review+2: Ghanshyam Mann <ghanshyam.mann@nectechnologies.in>
+Workflow+1: Ghanshyam Mann <ghanshyam.mann@nectechnologies.in>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 23 Feb 2016 22:10:11 +0000
+Reviewed-on: https://review.openstack.org/283618
+Project: openstack/deb-python-tempest-lib
+Branch: refs/heads/master

@@ -1,0 +1,9 @@
+Code-Review+2: Masayuki Igawa <masayuki.igawa@gmail.com>
+Code-Review+2: Sean Dague <sean@dague.net>
+Workflow+1: Sean Dague <sean@dague.net>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Thu, 11 Feb 2016 13:50:24 +0000
+Reviewed-on: https://review.openstack.org/278756
+Project: openstack/deb-python-tempest-lib
+Branch: refs/heads/master
